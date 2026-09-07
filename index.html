@@ -258,7 +258,7 @@
 
 <header class="masthead">
   <div class="masthead-inner">
-    <img src="https://raw.githubusercontent.com/CrossFit-Jefferson/cfj-scheduler/main/cfj-logo-white.png" alt="CrossFit Jefferson" class="logo"
+    <img src="cfj-logo-white.png" alt="CrossFit Jefferson" class="logo"
          onerror="this.outerHTML='&lt;div class=\'logo-fallback\'&gt;CF&lt;i&gt;J&lt;/i&gt;&lt;/div&gt;'">
     <h1 class="event-name" id="eventName">Loading</h1>
     <p class="event-intro" id="eventIntro"></p>
@@ -473,7 +473,10 @@ async function boot() {
   }
 
   try {
-    const res = await fetch(BACKEND_URL + '?action=config');
+    // Cache buster matters here: without it a browser can hold on to an old
+    // config response, so edits to the Settings tab appear not to take effect.
+    const res = await fetch(BACKEND_URL + '?action=config&t=' + Date.now(),
+                            { cache: 'no-store' });
     const data = await res.json();
     if (!data.ok) throw new Error(data.error || 'Config unavailable');
     config = data.config;
@@ -744,7 +747,8 @@ function renderSuccess(regIdFromUrl) {
 
   // Confirm against the sheet so we are not just trusting the URL
   if (regId && BACKEND_URL.indexOf('PASTE_') !== 0) {
-    fetch(BACKEND_URL + '?action=lookup&regId=' + encodeURIComponent(regId))
+    fetch(BACKEND_URL + '?action=lookup&regId=' + encodeURIComponent(regId) + '&t=' + Date.now(),
+          { cache: 'no-store' })
       .then(r => r.json())
       .then(data => {
         if (!data.ok || !data.registration) return;
