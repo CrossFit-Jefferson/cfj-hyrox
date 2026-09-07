@@ -116,6 +116,7 @@
     box-shadow: 0 0 0 3px rgba(1,21,45,0.12);
   }
   input.invalid { border-color: var(--red); background: #FFFBFB; }
+  input:disabled { background: var(--paper); color: var(--muted); cursor: not-allowed; }
 
   /* ---------- Division ---------- */
   .divisions { display: grid; gap: 9px; }
@@ -381,14 +382,10 @@
 
       <p class="waiver-opened" id="waiverOpened" hidden>&#10003; Waiver opened</p>
 
-      <label class="agree" id="agreeRow">
-        <input type="checkbox" id="waiverAccepted">
-        <span id="agreeLabel">I have read the waiver and I agree to it.</span>
-      </label>
-
-      <div class="field">
-        <label for="waiverSignature">Signature <span class="hint">Type your full name exactly as you entered it above</span></label>
-        <input type="text" id="waiverSignature" autocomplete="off">
+      <div class="field" id="signatureField" hidden>
+        <label for="waiverSignature" id="signatureLabel">Signature</label>
+        <p class="hint" id="signatureAgree" style="margin:0 0 9px">By typing my full name below, I confirm I have read the waiver and agree to it.</p>
+        <input type="text" id="waiverSignature" autocomplete="off" placeholder="Type your full name">
       </div>
     </div>
 
@@ -523,11 +520,11 @@ function renderForm() {
 
   $('submitBtn').addEventListener('click', submit);
 
-  // Signing your own name is the common case, so offer it
+  // Once they have entered a name above, show it as the expected signature
   $('waiverSignature').addEventListener('focus', () => {
     if ($('waiverSignature').value) return;
     const full = ($('firstName').value.trim() + ' ' + $('lastName').value.trim()).trim();
-    if (full) $('waiverSignature').placeholder = full;
+    $('waiverSignature').placeholder = full || 'Type your full name';
   });
 }
 
@@ -537,9 +534,14 @@ function renderForm() {
 function renderWaiver() {
   const hasLink = !!config.waiverUrl;
   const hasText = !!(config.waiverText && config.waiverText.trim());
+  const needSig = !!config.requireSignature;
+
+  $('signatureField').hidden = !needSig;
 
   if (hasLink) {
-    $('waiverIntro').textContent = 'Open the waiver, then sign by typing your name.';
+    $('waiverIntro').textContent = needSig
+      ? 'Open the waiver, then sign by typing your name.'
+      : 'Open the waiver and complete it. It has its own signature step.';
     $('waiverLink').href = config.waiverUrl;
     $('waiverLink').hidden = false;
 
@@ -548,16 +550,19 @@ function renderWaiver() {
       $('waiverBlurb').hidden = false;
     }
 
-    // Locked until opened
-    const box = $('waiverAccepted');
-    box.disabled = true;
-    $('agreeRow').classList.add('locked');
-    $('agreeLabel').textContent = 'Open the waiver above, then tick this box to agree.';
+    // Signing stays locked until the waiver has actually been opened
+    const sig = $('waiverSignature');
+    if (needSig) {
+      sig.disabled = true;
+      $('signatureAgree').textContent = 'Open the waiver above, then sign here.';
+    }
 
     const unlock = () => {
-      box.disabled = false;
-      $('agreeRow').classList.remove('locked');
-      $('agreeLabel').textContent = 'I have read the waiver and I agree to it.';
+      if (needSig) {
+        sig.disabled = false;
+        $('signatureAgree').textContent =
+          'By typing my full name below, I confirm I have read the waiver and agree to it.';
+      }
       $('waiverOpened').hidden = false;
     };
     $('waiverLink').addEventListener('click', unlock);
@@ -569,7 +574,9 @@ function renderWaiver() {
   }
 
   if (hasText) {
-    $('waiverIntro').textContent = 'Read it through, then sign by typing your name.';
+    $('waiverIntro').textContent = needSig
+      ? 'Read it through, then sign by typing your name.'
+      : 'Read it through before you register.';
     $('waiverText').textContent = config.waiverText;
     $('waiverText').hidden = false;
     return;
@@ -577,8 +584,7 @@ function renderWaiver() {
 
   // Nothing configured. The backend rejects these anyway, so say so plainly.
   $('waiverIntro').textContent = 'The waiver is not set up yet. Let us know at the gym and we will sort it out.';
-  $('waiverAccepted').disabled = true;
-  $('agreeRow').classList.add('locked');
+  $('signatureField').hidden = true;
 }
 
 function numberWord(n) {
@@ -665,22 +671,20 @@ async function submit() {
       : 'Enter all ' + partners.length + ' teammate names.');
   }
 
-  if ($('waiverAccepted').disabled) {
-    $('waiverLink').scrollIntoView({ behavior: 'smooth', block: 'center' });
-    return showError('Open the waiver first, then tick the box to agree.');
-  }
-  if (!$('waiverAccepted').checked) {
-    $('waiverAccepted').focus();
-    return showError('You need to accept the waiver to register.');
-  }
-  if (!signature) {
-    markInvalid($('waiverSignature'));
-    return showError('Type your full name to sign the waiver.');
-  }
-  const norm = s => s.toLowerCase().replace(/[^a-z\s]/g, '').replace(/\s+/g, ' ').trim();
-  if (norm(signature) !== norm(firstName + ' ' + lastName)) {
-    markInvalid($('waiverSignature'));
-    return showError('Your signature needs to match the name you entered above.');
+  if (config.requireSignature) {
+    if ($('waiverSignature').disabled) {
+      $('waiverLink').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return showError('Open the waiver first, then sign to agree.');
+    }
+    if (!signature) {
+      markInvalid($('waiverSignature'));
+      return showError('Type your full name to sign the waiver.');
+    }
+    const norm = s => s.toLowerCase().replace(/[^a-z\s]/g, '').replace(/\s+/g, ' ').trim();
+    if (norm(signature) !== norm(firstName + ' ' + lastName)) {
+      markInvalid($('waiverSignature'));
+      return showError('Your signature needs to match the name you entered above.');
+    }
   }
 
   submitting = true;
