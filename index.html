@@ -411,6 +411,16 @@
       <h2>Waiver</h2>
       <p class="panel-note" id="waiverIntro">Read it through, then sign by typing your name.</p>
 
+      <label class="agree" id="memberRow" style="margin-bottom:18px">
+        <input type="checkbox" id="isMember">
+        <span>I am already a member of CrossFit Jefferson</span>
+      </label>
+
+      <p class="hint" id="memberNote" hidden style="margin:-6px 0 0">
+        We already have your waiver on file, so there is nothing else to sign.
+      </p>
+
+      <div id="waiverBlock">
       <div class="waiver-scroll" id="waiverText" tabindex="0" hidden></div>
 
       <p class="panel-note" id="waiverBlurb" hidden style="margin-bottom:14px"></p>
@@ -430,6 +440,7 @@
         <p class="hint" id="signatureAgree" style="margin:0 0 9px">By typing my full name below, I confirm I have read the waiver and agree to it.</p>
         <input type="text" id="waiverSignature" autocomplete="off" placeholder="Type your full name">
       </div>
+      </div><!-- /waiverBlock -->
     </div>
 
     <div class="panel">
@@ -562,6 +573,15 @@ function renderForm() {
 
   document.querySelectorAll('input[name=division]').forEach(radio => {
     radio.addEventListener('change', renderPartnerFields);
+  });
+
+  // Members already have a waiver on file, so hide the whole waiver block for them
+  $('isMember').addEventListener('change', () => {
+    const member = $('isMember').checked;
+    $('waiverBlock').hidden = member;
+    $('memberNote').hidden = !member;
+    $('waiverIntro').hidden = member;
+    clearError();
   });
 
   $('submitBtn').addEventListener('click', submit);
@@ -717,7 +737,9 @@ async function submit() {
       : 'Enter all ' + partners.length + ' teammate names.');
   }
 
-  if (config.requireSignature) {
+  const isMember = $('isMember').checked;
+
+  if (!isMember && config.requireSignature) {
     if ($('waiverSignature').disabled) {
       $('waiverLink').scrollIntoView({ behavior: 'smooth', block: 'center' });
       return showError('Open the waiver first, then sign to agree.');
@@ -745,6 +767,7 @@ async function submit() {
         action: 'register',
         firstName, lastName, email, phone, division,
         partners: partners.filter(Boolean),
+        isMember: isMember,
         waiverAccepted: true,
         waiverSignature: signature,
       }),
