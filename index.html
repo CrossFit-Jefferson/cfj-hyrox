@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register · CrossFit Jefferson</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #01152D;
+    --red: #D70D1B;
+    --red-deep: #A80A15;
+    --white: #FFFFFF;
+    --paper: #F7F8FA;
+    --line: #D5D9E0;
+    --muted: #6B7280;
+    --ok: #14532D;
+    --ok-bg: #DCF3E3;
+    --warn-bg: #FFF3CD;
+    --warn-ink: #7A5B00;
+    --err-bg: #FADBDD;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--paper);
+    color: var(--navy);
+    font-family: 'Poppins', system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+  }
+
+  .page { max-width: 620px; margin: 0 auto; padding: 0 18px 72px; }
+
+  /* ---------- Masthead ---------- */
+  .masthead {
+    background: var(--navy);
+    margin: 0 -18px 0;
+    padding: 26px 22px 30px;
+    color: var(--white);
+  }
+  .masthead-inner { max-width: 620px; margin: 0 auto; }
+  .logo { height: 40px; width: auto; display: block; margin-bottom: 26px; }
+  .logo-fallback {
+    font-family: 'Sora'; font-size: 26px; font-weight: 800;
+    color: var(--white); margin-bottom: 26px; letter-spacing: 0.01em;
+  }
+  .logo-fallback i { color: var(--red); font-style: normal; }
+
+  .event-name {
+    font-family: 'Sora'; font-weight: 800;
+    font-size: clamp(30px, 8vw, 46px);
+    line-height: 1.02; letter-spacing: -0.02em;
+    margin: 0 0 14px;
+  }
+  .event-meta {
+    display: flex; flex-wrap: wrap; gap: 10px 0;
+    border-top: 1px solid rgba(255,255,255,0.18);
+    padding-top: 14px; margin-top: 18px;
+  }
+  .event-meta div { flex: 1 1 33%; min-width: 96px; }
+  .event-meta dt {
+    font-size: 11px; font-weight: 500;
+    color: #93A2B8; margin: 0 0 3px;
+  }
+  .event-meta dd {
+    font-family: 'Sora'; font-size: 15px; font-weight: 700;
+    margin: 0; color: var(--white);
+  }
+  .event-intro {
+    font-size: 15px; color: #C3CDDB;
+    margin: 0; max-width: 46ch;
+  }
+
+  /* ---------- Panels ---------- */
+  .panel {
+    background: var(--white);
+    border: 1px solid var(--line);
+    padding: 24px 22px;
+    margin-top: 18px;
+  }
+  .panel h2 {
+    font-family: 'Sora'; font-size: 19px; font-weight: 700;
+    margin: 0 0 4px; letter-spacing: -0.01em;
+  }
+  .panel-note {
+    font-size: 14px; color: var(--muted);
+    margin: 0 0 20px;
+  }
+
+  /* ---------- Fields ---------- */
+  .field { margin-bottom: 16px; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 460px) { .row2 { grid-template-columns: 1fr; } }
+
+  label {
+    display: block; font-size: 14px; font-weight: 500;
+    margin-bottom: 5px;
+  }
+  .hint { font-size: 13px; color: var(--muted); font-weight: 400; }
+
+  input[type=text], input[type=email], input[type=tel] {
+    width: 100%; padding: 11px 13px;
+    font-family: 'Poppins'; font-size: 16px;
+    color: var(--navy); background: var(--white);
+    border: 1px solid var(--line); border-radius: 3px;
+    transition: border-color 0.12s, box-shadow 0.12s;
+  }
+  input:focus-visible {
+    outline: none; border-color: var(--navy);
+    box-shadow: 0 0 0 3px rgba(1,21,45,0.12);
+  }
+  input.invalid { border-color: var(--red); background: #FFFBFB; }
+
+  /* ---------- Division ---------- */
+  .divisions { display: grid; gap: 9px; }
+  .division {
+    display: flex; align-items: baseline; gap: 12px;
+    border: 1px solid var(--line); border-radius: 3px;
+    padding: 14px 16px; cursor: pointer;
+    background: var(--white);
+    transition: border-color 0.12s, background 0.12s;
+  }
+  .division:hover { border-color: var(--navy); }
+  .division input { position: absolute; opacity: 0; pointer-events: none; }
+  .division .dot {
+    width: 17px; height: 17px; flex: 0 0 17px;
+    border: 2px solid var(--line); border-radius: 50%;
+    position: relative; top: 3px; transition: border-color 0.12s;
+  }
+  .division-name {
+    font-family: 'Sora'; font-weight: 700; font-size: 16px;
+    display: block; line-height: 1.3;
+  }
+  .division-desc { font-size: 13.5px; color: var(--muted); }
+  .division:has(input:checked) {
+    border-color: var(--red); background: #FFF7F7;
+  }
+  .division:has(input:checked) .dot {
+    border-color: var(--red); border-width: 5px;
+  }
+  .division:has(input:focus-visible) {
+    box-shadow: 0 0 0 3px rgba(1,21,45,0.12);
+  }
+
+  #partnerBlock { margin-top: 18px; }
+  #partnerBlock[hidden] { display: none; }
+
+  /* ---------- Waiver ---------- */
+  .waiver-scroll {
+    max-height: 190px; overflow-y: auto;
+    border: 1px solid var(--line); border-radius: 3px;
+    padding: 15px 16px; margin-bottom: 16px;
+    background: var(--paper);
+    font-size: 13.5px; line-height: 1.65;
+    color: #374151; white-space: pre-wrap;
+  }
+  .waiver-link {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 14px; text-decoration: none;
+    border: 1px solid var(--navy); border-radius: 3px;
+    padding: 15px 17px; margin-bottom: 16px;
+    background: var(--white); color: var(--navy);
+    transition: background 0.12s;
+  }
+  .waiver-link:hover { background: var(--paper); }
+  .waiver-link:focus-visible { outline: 3px solid var(--navy); outline-offset: 2px; }
+  .waiver-link-label {
+    font-family: 'Sora'; font-weight: 700; font-size: 15.5px;
+    display: block; line-height: 1.3;
+  }
+  .waiver-link-sub { font-size: 13px; color: var(--muted); }
+  .waiver-link-icon { flex: 0 0 auto; font-size: 17px; color: var(--red); }
+  .waiver-opened {
+    font-size: 13.5px; color: var(--ok); margin: -6px 0 16px;
+  }
+  .agree {
+    display: flex; gap: 11px; align-items: flex-start;
+    font-size: 14.5px; cursor: pointer; margin-bottom: 16px;
+  }
+  .agree.locked { color: var(--muted); cursor: not-allowed; }
+  .agree input {
+    width: 19px; height: 19px; flex: 0 0 19px;
+    margin: 2px 0 0; accent-color: var(--red); cursor: pointer;
+  }
+
+  /* ---------- Submit ---------- */
+  .submit {
+    width: 100%; padding: 16px;
+    font-family: 'Sora'; font-size: 16px; font-weight: 700;
+    letter-spacing: 0.01em;
+    color: var(--white); background: var(--red);
+    border: none; border-radius: 3px; cursor: pointer;
+    transition: background 0.12s;
+  }
+  .submit:hover:not(:disabled) { background: var(--red-deep); }
+  .submit:focus-visible { outline: 3px solid var(--navy); outline-offset: 2px; }
+  .submit:disabled { background: #B9C0CA; cursor: not-allowed; }
+  .submit-note {
+    font-size: 13px; color: var(--muted);
+    text-align: center; margin: 11px 0 0;
+  }
+
+  /* ---------- Messages ---------- */
+  .alert {
+    padding: 13px 15px; border-radius: 3px;
+    font-size: 14.5px; margin-bottom: 18px;
+    border-left: 4px solid;
+  }
+  .alert-error { background: var(--err-bg); border-color: var(--red); }
+  .alert-warn { background: var(--warn-bg); border-color: #C9A227; color: var(--warn-ink); }
+
+  /* ---------- States ---------- */
+  .state { display: none; }
+  .state.on { display: block; }
+
+  .loading {
+    text-align: center; padding: 70px 20px; color: var(--muted);
+  }
+  .spinner {
+    width: 26px; height: 26px; margin: 0 auto 14px;
+    border: 3px solid var(--line); border-top-color: var(--red);
+    border-radius: 50%; animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .done { text-align: center; padding: 20px 0 6px; }
+  .done-check {
+    width: 54px; height: 54px; margin: 0 auto 18px;
+    border-radius: 50%; background: var(--ok-bg); color: var(--ok);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 700;
+  }
+  .done h2 {
+    font-family: 'Sora'; font-size: 26px; font-weight: 800;
+    margin: 0 0 8px; letter-spacing: -0.01em;
+  }
+  .done p { color: var(--muted); margin: 0 0 22px; font-size: 15px; }
+  .reg-id {
+    display: inline-block;
+    background: var(--paper); border: 1px solid var(--line);
+    padding: 9px 16px; border-radius: 3px;
+    font-family: 'Sora'; font-weight: 700; font-size: 17px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <img src="https://raw.githubusercontent.com/CrossFit-Jefferson/cfj-scheduler/main/cfj-logo-white.png" alt="CrossFit Jefferson" class="logo"
+         onerror="this.outerHTML='&lt;div class=\'logo-fallback\'&gt;CF&lt;i&gt;J&lt;/i&gt;&lt;/div&gt;'">
+    <h1 class="event-name" id="eventName">Loading</h1>
+    <p class="event-intro" id="eventIntro"></p>
+    <dl class="event-meta" id="eventMeta" hidden>
+      <div><dt>Date</dt><dd id="metaDate"></dd></div>
+      <div><dt>Where</dt><dd id="metaWhere"></dd></div>
+      <div><dt>Entry</dt><dd id="metaPrice"></dd></div>
+    </dl>
+  </div>
+</header>
+
+<main class="page">
+
+  <!-- Loading -->
+  <section class="state on" id="stateLoading">
+    <div class="loading">
+      <div class="spinner"></div>
+      Loading registration
+    </div>
+  </section>
+
+  <!-- Cannot reach backend -->
+  <section class="state" id="stateDown">
+    <div class="panel">
+      <h2>Registration is not loading</h2>
+      <p class="panel-note">Something on our end is not responding. Refresh the page, and if it keeps happening let us know at the gym and we will get you signed up directly.</p>
+    </div>
+  </section>
+
+  <!-- Registration closed -->
+  <section class="state" id="stateClosed">
+    <div class="panel">
+      <h2>Registration is closed</h2>
+      <p class="panel-note" id="closedMessage"></p>
+    </div>
+  </section>
+
+  <!-- The form -->
+  <section class="state" id="stateForm">
+    <div class="panel">
+      <h2>Your details</h2>
+      <p class="panel-note">We use these to check you in on race day and to send your confirmation.</p>
+
+      <div class="row2">
+        <div class="field">
+          <label for="firstName">First name</label>
+          <input type="text" id="firstName" autocomplete="given-name">
+        </div>
+        <div class="field">
+          <label for="lastName">Last name</label>
+          <input type="text" id="lastName" autocomplete="family-name">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" autocomplete="email" inputmode="email">
+      </div>
+
+      <div class="field">
+        <label for="phone">Phone</label>
+        <input type="tel" id="phone" autocomplete="tel" inputmode="tel">
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Division</h2>
+      <p class="panel-note">Everyone registers and pays for themselves, including doubles and teams.</p>
+
+      <div class="divisions" id="divisions">
+        <label class="division">
+          <input type="radio" name="division" value="Individual">
+          <span class="dot"></span>
+          <span>
+            <span class="division-name">Individual</span>
+            <span class="division-desc">You against the clock, every station and every run.</span>
+          </span>
+        </label>
+        <label class="division">
+          <input type="radio" name="division" value="Doubles">
+          <span class="dot"></span>
+          <span>
+            <span class="division-name">Doubles</span>
+            <span class="division-desc">Two athletes splitting the work.</span>
+          </span>
+        </label>
+        <label class="division">
+          <input type="radio" name="division" value="Team">
+          <span class="dot"></span>
+          <span>
+            <span class="division-name">Team relay</span>
+            <span class="division-desc" id="teamDesc">Four athletes trading off through the course.</span>
+          </span>
+        </label>
+      </div>
+
+      <div id="partnerBlock" hidden>
+        <div class="field">
+          <label id="partnerLabel">Who are you racing with?</label>
+          <p class="hint" id="partnerHint" style="margin:0 0 9px"></p>
+          <div id="partnerInputs"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Waiver</h2>
+      <p class="panel-note" id="waiverIntro">Read it through, then sign by typing your name.</p>
+
+      <div class="waiver-scroll" id="waiverText" tabindex="0" hidden></div>
+
+      <p class="panel-note" id="waiverBlurb" hidden style="margin-bottom:14px"></p>
+
+      <a class="waiver-link" id="waiverLink" href="#" target="_blank" rel="noopener" hidden>
+        <span>
+          <span class="waiver-link-label">Read the waiver</span>
+          <span class="waiver-link-sub">Opens in a new tab</span>
+        </span>
+        <span class="waiver-link-icon" aria-hidden="true">&#8599;</span>
+      </a>
+
+      <p class="waiver-opened" id="waiverOpened" hidden>&#10003; Waiver opened</p>
+
+      <label class="agree" id="agreeRow">
+        <input type="checkbox" id="waiverAccepted">
+        <span id="agreeLabel">I have read the waiver and I agree to it.</span>
+      </label>
+
+      <div class="field">
+        <label for="waiverSignature">Signature <span class="hint">Type your full name exactly as you entered it above</span></label>
+        <input type="text" id="waiverSignature" autocomplete="off">
+      </div>
+    </div>
+
+    <div class="panel">
+      <div id="formError"></div>
+      <button class="submit" id="submitBtn">Continue to payment</button>
+      <p class="submit-note" id="submitNote">Payment is handled by Stripe. Your spot is held once it clears.</p>
+    </div>
+  </section>
+
+  <!-- Sending -->
+  <section class="state" id="stateSending">
+    <div class="loading">
+      <div class="spinner"></div>
+      Taking you to checkout
+    </div>
+  </section>
+
+  <!-- Paid -->
+  <section class="state" id="stateDone">
+    <div class="panel">
+      <div class="done">
+        <div class="done-check">&#10003;</div>
+        <h2 id="doneHeading">You are in</h2>
+        <p id="doneBody">Your confirmation email is on its way.</p>
+        <div class="reg-id" id="doneRegId" hidden></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+// ============================================================
+// CONFIG
+// ============================================================
+// Paste the /exec URL of your Hyrox backend web app here.
+const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbx_lojNAsZVU1R5GTwM15oZNqc50jrAOcnqCDVbd5dllyg_9d-FTNw07bncx0bDDm1JhQ/exec';
+
+// ============================================================
+// STATE
+// ============================================================
+let config = null;
+let submitting = false;
+
+const $ = id => document.getElementById(id);
+
+function show(id) {
+  document.querySelectorAll('.state').forEach(el => el.classList.remove('on'));
+  $(id).classList.add('on');
+}
+
+function esc(s) {
+  return (s || '').toString()
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function showError(msg) {
+  $('formError').innerHTML = '<div class="alert alert-error">' + esc(msg) + '</div>';
+  $('formError').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function clearError() { $('formError').innerHTML = ''; }
+
+// ============================================================
+// BOOT
+// ============================================================
+
+async function boot() {
+  if (BACKEND_URL.indexOf('PASTE_') === 0) {
+    $('eventName').textContent = 'Setup needed';
+    show('stateDown');
+    $('stateDown').querySelector('h2').textContent = 'Backend URL not set';
+    $('stateDown').querySelector('.panel-note').textContent =
+      'Edit index.html and replace PASTE_YOUR_HYROX_BACKEND_URL_HERE with the Apps Script web app URL.';
+    return;
+  }
+
+  // Coming back from Stripe
+  const params = new URLSearchParams(location.search);
+  if (params.get('status') === 'success') {
+    renderSuccess(params.get('reg') || '');
+    return;
+  }
+
+  try {
+    const res = await fetch(BACKEND_URL + '?action=config');
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'Config unavailable');
+    config = data.config;
+  } catch (err) {
+    show('stateDown');
+    $('eventName').textContent = 'CrossFit Jefferson';
+    return;
+  }
+
+  renderHeader();
+
+  if (!config.registrationOpen) {
+    $('closedMessage').textContent = config.closedMessage;
+    show('stateClosed');
+    return;
+  }
+
+  renderForm();
+  show('stateForm');
+}
+
+function renderHeader() {
+  document.title = config.eventName + ' · CrossFit Jefferson';
+  $('eventName').textContent = config.eventName;
+  $('eventIntro').textContent = config.intro || '';
+
+  const hasMeta = config.eventDate || config.eventLocation || config.priceDisplay;
+  if (hasMeta) {
+    $('metaDate').textContent = config.eventDate || 'TBA';
+    $('metaWhere').textContent = config.eventLocation || 'TBA';
+    $('metaPrice').textContent = config.priceDisplay || 'TBA';
+    $('eventMeta').hidden = false;
+  }
+}
+
+function renderForm() {
+  renderWaiver();
+  $('teamDesc').textContent =
+    numberWord(config.teamSize) + ' athletes trading off through the course.';
+
+  document.querySelectorAll('input[name=division]').forEach(radio => {
+    radio.addEventListener('change', renderPartnerFields);
+  });
+
+  $('submitBtn').addEventListener('click', submit);
+
+  // Signing your own name is the common case, so offer it
+  $('waiverSignature').addEventListener('focus', () => {
+    if ($('waiverSignature').value) return;
+    const full = ($('firstName').value.trim() + ' ' + $('lastName').value.trim()).trim();
+    if (full) $('waiverSignature').placeholder = full;
+  });
+}
+
+// Two shapes here. A link, which is what most gyms already have, or the full
+// text inline. With a link the checkbox stays locked until it is opened, so
+// nobody agrees to something they never pulled up.
+function renderWaiver() {
+  const hasLink = !!config.waiverUrl;
+  const hasText = !!(config.waiverText && config.waiverText.trim());
+
+  if (hasLink) {
+    $('waiverIntro').textContent = 'Open the waiver, then sign by typing your name.';
+    $('waiverLink').href = config.waiverUrl;
+    $('waiverLink').hidden = false;
+
+    if (hasText) {
+      $('waiverBlurb').textContent = config.waiverText;
+      $('waiverBlurb').hidden = false;
+    }
+
+    // Locked until opened
+    const box = $('waiverAccepted');
+    box.disabled = true;
+    $('agreeRow').classList.add('locked');
+    $('agreeLabel').textContent = 'Open the waiver above, then tick this box to agree.';
+
+    const unlock = () => {
+      box.disabled = false;
+      $('agreeRow').classList.remove('locked');
+      $('agreeLabel').textContent = 'I have read the waiver and I agree to it.';
+      $('waiverOpened').hidden = false;
+    };
+    $('waiverLink').addEventListener('click', unlock);
+    // Keyboard users who hit enter on the link get the same treatment
+    $('waiverLink').addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') unlock();
+    });
+    return;
+  }
+
+  if (hasText) {
+    $('waiverIntro').textContent = 'Read it through, then sign by typing your name.';
+    $('waiverText').textContent = config.waiverText;
+    $('waiverText').hidden = false;
+    return;
+  }
+
+  // Nothing configured. The backend rejects these anyway, so say so plainly.
+  $('waiverIntro').textContent = 'The waiver is not set up yet. Let us know at the gym and we will sort it out.';
+  $('waiverAccepted').disabled = true;
+  $('agreeRow').classList.add('locked');
+}
+
+function numberWord(n) {
+  const words = { 2: 'Two', 3: 'Three', 4: 'Four', 5: 'Five', 6: 'Six' };
+  return words[n] || n;
+}
+
+function renderPartnerFields() {
+  const division = getDivision();
+  const block = $('partnerBlock');
+  const inputs = $('partnerInputs');
+
+  if (division === 'Individual' || !division) {
+    block.hidden = true;
+    inputs.innerHTML = '';
+    return;
+  }
+
+  const count = division === 'Doubles' ? 1 : config.teamSize - 1;
+  $('partnerLabel').textContent = count === 1 ? 'Your partner' : 'Your teammates';
+  $('partnerHint').textContent = count === 1
+    ? 'Full name, spelled the way they will register. We use it to pair you up.'
+    : 'Full names, spelled the way they will register. We use these to build your team.';
+
+  inputs.innerHTML = '';
+  for (let i = 0; i < count; i++) {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'partner-input';
+    input.placeholder = count === 1 ? 'Partner full name' : 'Teammate ' + (i + 1) + ' full name';
+    input.style.marginBottom = i < count - 1 ? '9px' : '0';
+    inputs.appendChild(input);
+  }
+  block.hidden = false;
+}
+
+function getDivision() {
+  const checked = document.querySelector('input[name=division]:checked');
+  return checked ? checked.value : '';
+}
+
+// ============================================================
+// SUBMIT
+// ============================================================
+
+function markInvalid(el) {
+  el.classList.add('invalid');
+  el.addEventListener('input', () => el.classList.remove('invalid'), { once: true });
+  el.focus();
+}
+
+async function submit() {
+  if (submitting) return;
+  clearError();
+
+  const firstName = $('firstName').value.trim();
+  const lastName = $('lastName').value.trim();
+  const email = $('email').value.trim();
+  const phone = $('phone').value.trim();
+  const division = getDivision();
+  const signature = $('waiverSignature').value.trim();
+
+  // Validate here so people get an answer instantly, then again on the server
+  if (!firstName) { markInvalid($('firstName')); return showError('Enter your first name.'); }
+  if (!lastName) { markInvalid($('lastName')); return showError('Enter your last name.'); }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+    markInvalid($('email')); return showError('Enter a valid email address. Your confirmation goes here.');
+  }
+  if (phone.replace(/\D/g, '').length < 10) {
+    markInvalid($('phone')); return showError('Enter a valid phone number.');
+  }
+  if (!division) {
+    $('divisions').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return showError('Choose a division.');
+  }
+
+  const partners = [...document.querySelectorAll('.partner-input')]
+    .map(i => i.value.trim());
+  if (division !== 'Individual' && partners.some(p => !p)) {
+    const empty = [...document.querySelectorAll('.partner-input')].find(i => !i.value.trim());
+    markInvalid(empty);
+    return showError(division === 'Doubles'
+      ? 'Enter your partner\u2019s name.'
+      : 'Enter all ' + partners.length + ' teammate names.');
+  }
+
+  if ($('waiverAccepted').disabled) {
+    $('waiverLink').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return showError('Open the waiver first, then tick the box to agree.');
+  }
+  if (!$('waiverAccepted').checked) {
+    $('waiverAccepted').focus();
+    return showError('You need to accept the waiver to register.');
+  }
+  if (!signature) {
+    markInvalid($('waiverSignature'));
+    return showError('Type your full name to sign the waiver.');
+  }
+  const norm = s => s.toLowerCase().replace(/[^a-z\s]/g, '').replace(/\s+/g, ' ').trim();
+  if (norm(signature) !== norm(firstName + ' ' + lastName)) {
+    markInvalid($('waiverSignature'));
+    return showError('Your signature needs to match the name you entered above.');
+  }
+
+  submitting = true;
+  $('submitBtn').disabled = true;
+  show('stateSending');
+
+  try {
+    const res = await fetch(BACKEND_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        action: 'register',
+        firstName, lastName, email, phone, division,
+        partners: partners.filter(Boolean),
+        waiverAccepted: true,
+        waiverSignature: signature,
+      }),
+    });
+    const data = await res.json();
+
+    if (!data.ok) {
+      submitting = false;
+      $('submitBtn').disabled = false;
+      show('stateForm');
+      showError(data.error || 'Registration did not go through. Try again.');
+      return;
+    }
+
+    // Hand off to Stripe
+    sessionStorage.setItem('cfjRegId', data.regId || '');
+    location.href = data.paymentUrl;
+
+  } catch (err) {
+    submitting = false;
+    $('submitBtn').disabled = false;
+    show('stateForm');
+    showError('Could not reach the server. Check your connection and try again.');
+  }
+}
+
+// ============================================================
+// SUCCESS
+// ============================================================
+
+function renderSuccess(regIdFromUrl) {
+  const regId = regIdFromUrl || sessionStorage.getItem('cfjRegId') || '';
+  sessionStorage.removeItem('cfjRegId');
+
+  $('eventName').textContent = 'You are registered';
+  $('eventIntro').textContent = 'See you on race day.';
+
+  if (regId) {
+    $('doneRegId').textContent = regId;
+    $('doneRegId').hidden = false;
+  }
+  show('stateDone');
+
+  // Confirm against the sheet so we are not just trusting the URL
+  if (regId && BACKEND_URL.indexOf('PASTE_') !== 0) {
+    fetch(BACKEND_URL + '?action=lookup&regId=' + encodeURIComponent(regId))
+      .then(r => r.json())
+      .then(data => {
+        if (!data.ok || !data.registration) return;
+        const reg = data.registration;
+        if (reg.firstName) $('doneHeading').textContent = 'You are in, ' + reg.firstName;
+        if (reg.status === 'pending') {
+          $('doneBody').innerHTML =
+            'Payment is still settling. This usually takes a few seconds. '
+            + 'Your confirmation email will land once it clears, and if it does not arrive within an hour, let us know.';
+        }
+      })
+      .catch(() => {});
+  }
+}
+
+boot();
+</script>
+</body>
+</html>
