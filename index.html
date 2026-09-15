@@ -153,6 +153,23 @@
   .division:has(input:focus-visible) {
     box-shadow: 0 0 0 3px rgba(1,21,45,0.12);
   }
+  .division.full {
+    background: var(--paper); border-color: var(--line);
+    cursor: not-allowed; opacity: 0.7;
+  }
+  .division.full:hover { border-color: var(--line); background: var(--paper); }
+  .division.full .division-name { color: var(--muted); }
+  .division.full .dot { border-color: var(--line); background: var(--paper); }
+  .full-tag {
+    display: inline-block; margin-left: 8px;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+    background: var(--navy); color: var(--white);
+    padding: 2px 7px; border-radius: 2px; vertical-align: 2px;
+  }
+  .spots-left {
+    display: inline-block; margin-left: 8px;
+    font-size: 12px; font-weight: 600; color: var(--red);
+  }
 
   #partnerBlock { margin-top: 18px; }
   #partnerBlock[hidden] { display: none; }
@@ -571,6 +588,8 @@ function renderForm() {
   $('teamDesc').textContent =
     numberWord(config.teamSize) + ' athletes trading off through the course.';
 
+  renderDivisionCapacity();
+
   document.querySelectorAll('input[name=division]').forEach(radio => {
     radio.addEventListener('change', renderPartnerFields);
   });
@@ -653,6 +672,29 @@ function renderWaiver() {
   $('signatureField').hidden = true;
 }
 
+// Marks divisions full, or flags the last few spots, from the counts the
+// backend sends. The backend re-checks on submit, so this is convenience only.
+function renderDivisionCapacity() {
+  const caps = config.divisions || {};
+  document.querySelectorAll('input[name=division]').forEach(input => {
+    const info = caps[input.value];
+    if (!info) return;
+    const label = input.closest('.division');
+    const nameEl = label.querySelector('.division-name');
+
+    if (info.full) {
+      input.disabled = true;
+      input.checked = false;
+      label.classList.add('full');
+      nameEl.insertAdjacentHTML('beforeend', '<span class="full-tag">FULL</span>');
+    } else if (info.remaining !== null && info.remaining <= 3) {
+      const n = info.remaining;
+      nameEl.insertAdjacentHTML('beforeend',
+        '<span class="spots-left">' + n + ' spot' + (n === 1 ? '' : 's') + ' left</span>');
+    }
+  });
+}
+
 function numberWord(n) {
   const words = { 2: 'Two', 3: 'Three', 4: 'Four', 5: 'Five', 6: 'Six' };
   return words[n] || n;
@@ -724,7 +766,10 @@ async function submit() {
   }
   if (!division) {
     $('divisions').scrollIntoView({ behavior: 'smooth', block: 'center' });
-    return showError('Choose a division.');
+    const anyOpen = [...document.querySelectorAll('input[name=division]')].some(i => !i.disabled);
+    return showError(anyOpen
+      ? 'Choose a division.'
+      : 'Every division is full right now. Check back in case a spot opens up.');
   }
 
   const partners = [...document.querySelectorAll('.partner-input')]
