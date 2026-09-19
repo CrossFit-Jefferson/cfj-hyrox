@@ -185,6 +185,16 @@
     font-size: 12px; font-weight: 600; color: var(--red);
   }
 
+  .callout {
+    background: #FFF4F4; border-left: 4px solid var(--red);
+    padding: 14px 16px; margin: 18px 0 0;
+  }
+  .callout strong {
+    display: block; font-size: 15.5px; color: var(--navy);
+    margin-bottom: 4px;
+  }
+  .callout span { font-size: 14px; color: #374151; }
+
   #partnerBlock { margin-top: 18px; }
   #partnerBlock[hidden] { display: none; }
 
@@ -405,7 +415,7 @@
 
     <div class="panel">
       <h2>Division</h2>
-      <p class="panel-note">Everyone registers and pays for themselves, including doubles and teams.</p>
+      <p class="panel-note">Pick how you are racing.</p>
 
       <div class="divisions" id="divisions">
         <label class="division">
@@ -435,6 +445,11 @@
       </div>
 
       <div id="partnerBlock" hidden>
+        <div class="callout" id="groupCallout">
+          <strong id="calloutTitle">Everyone races their own registration</strong>
+          <span id="calloutBody"></span>
+        </div>
+
         <div class="field">
           <label id="partnerLabel">Who are you racing with?</label>
           <p class="hint" id="partnerHint" style="margin:0 0 9px"></p>
@@ -746,6 +761,18 @@ function renderPartnerFields() {
   }
 
   const count = division === 'Doubles' ? 1 : config.teamSize - 1;
+
+  // The usual way a group falls apart is one person assuming they signed
+  // everybody up, so say it before they pay rather than only afterwards.
+  $('calloutTitle').textContent = division === 'Doubles'
+    ? 'Your partner has to register too'
+    : 'Every teammate has to register too';
+  $('calloutBody').textContent = division === 'Doubles'
+    ? 'This form signs up one athlete. Your partner needs to fill it in and pay '
+      + 'separately, using this same link. You are not a confirmed pair until they do.'
+    : 'This form signs up one athlete. All ' + config.teamSize + ' of you need to fill it in '
+      + 'and pay separately, using this same link. Your team is not confirmed until everyone has.';
+
   $('partnerLabel').textContent = count === 1 ? 'Your partner' : 'Your teammates';
   $('partnerHint').textContent = count === 1
     ? 'Full name, spelled the way they will register. We use it to pair you up.'
