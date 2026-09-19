@@ -120,7 +120,21 @@
     outline: none; border-color: var(--navy);
     box-shadow: 0 0 0 3px rgba(1,21,45,0.12);
   }
-  input.invalid { border-color: var(--red); background: #FFFBFB; }
+  input.invalid, select.invalid { border-color: var(--red); background: #FFFBFB; }
+  select {
+    width: 100%; padding: 11px 13px;
+    font-family: 'Poppins'; font-size: 16px;
+    color: var(--navy); background: var(--white);
+    border: 1px solid var(--line); border-radius: 3px;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath fill='%236B7280' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center;
+    background-size: 12px; padding-right: 38px;
+  }
+  select:focus-visible {
+    outline: none; border-color: var(--navy);
+    box-shadow: 0 0 0 3px rgba(1,21,45,0.12);
+  }
   input:disabled { background: var(--paper); color: var(--muted); cursor: not-allowed; }
 
   /* ---------- Division ---------- */
@@ -382,6 +396,11 @@
         <label for="phone">Phone</label>
         <input type="tel" id="phone" autocomplete="tel" inputmode="tel">
       </div>
+
+      <div class="field" id="shirtField" hidden>
+        <label for="shirtSize">Shirt size</label>
+        <select id="shirtSize"><option value="">Choose a size</option></select>
+      </div>
     </div>
 
     <div class="panel">
@@ -588,6 +607,7 @@ function renderForm() {
   $('teamDesc').textContent =
     numberWord(config.teamSize) + ' athletes trading off through the course.';
 
+  renderShirtSizes();
   renderDivisionCapacity();
 
   document.querySelectorAll('input[name=division]').forEach(radio => {
@@ -670,6 +690,20 @@ function renderWaiver() {
   // Nothing configured. The backend rejects these anyway, so say so plainly.
   $('waiverIntro').textContent = 'The waiver is not set up yet. Let us know at the gym and we will sort it out.';
   $('signatureField').hidden = true;
+}
+
+// Sizes come from the Settings tab. No sizes configured means no shirts, so
+// the question disappears rather than asking for something you cannot supply.
+function renderShirtSizes() {
+  const sizes = config.shirtSizes || [];
+  if (!sizes.length) { $('shirtField').hidden = true; return; }
+  const sel = $('shirtSize');
+  sizes.forEach(sz => {
+    const o = document.createElement('option');
+    o.value = sz; o.textContent = sz;
+    sel.appendChild(o);
+  });
+  $('shirtField').hidden = false;
 }
 
 // Marks divisions full, or flags the last few spots, from the counts the
@@ -764,6 +798,12 @@ async function submit() {
   if (phone.replace(/\D/g, '').length < 10) {
     markInvalid($('phone')); return showError('Enter a valid phone number.');
   }
+  const shirtSize = $('shirtSize').value;
+  if ((config.shirtSizes || []).length && !shirtSize) {
+    markInvalid($('shirtSize'));
+    return showError('Pick a shirt size.');
+  }
+
   if (!division) {
     $('divisions').scrollIntoView({ behavior: 'smooth', block: 'center' });
     const anyOpen = [...document.querySelectorAll('input[name=division]')].some(i => !i.disabled);
@@ -812,6 +852,7 @@ async function submit() {
         action: 'register',
         firstName, lastName, email, phone, division,
         partners: partners.filter(Boolean),
+        shirtSize: shirtSize,
         isMember: isMember,
         waiverAccepted: true,
         waiverSignature: signature,
